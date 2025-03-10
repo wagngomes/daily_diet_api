@@ -1,13 +1,15 @@
-import fastify from "fastify"
+import fastify from "fastify";
+import { mealsRouter } from "./routes/mealsRoutes";
 
-const app = fastify()
+const app = fastify();
+app.register(mealsRouter);
 
-app.get('/', () => {
-    return 'hello world'
-})
+app
+  .listen({
+    port: 3333,
+  })
+  .then(() => {
+    console.log("servidor no ar");
+  });
 
-app.listen({
-    port: 3333
-}).then(() => {
-    console.log('servidor no ar')
-})
+export default app;
