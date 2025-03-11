@@ -1,7 +1,9 @@
 import fastify from "fastify";
 import { mealsRouter } from "./routes/mealsRoutes";
+import cookie from "@fastify/cookie";
 
 const app = fastify();
+app.register(cookie);
 app.register(mealsRouter);
 
 app
