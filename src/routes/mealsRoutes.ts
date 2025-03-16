@@ -12,14 +12,11 @@ export function mealsRouter(app: FastifyInstance) {
 
   app.post("/meals", async (request, reply) => {
     const createMealsRegister = z.object({
-      //id: z.string().uuid(),
       name: z.string(),
       description: z.string(),
       Within_diet: z.boolean(),
       date: z.string().date(),
       time: z.string().time(),
-      //created_at: z.string().optional(),
-      //session_id: z.string().uuid(),
     });
 
     const meal = createMealsRegister.parse(request.body);
@@ -65,4 +62,46 @@ export function mealsRouter(app: FastifyInstance) {
 
     return { allMeals };
   });
+
+  app.delete("/meals/:id",{preHandler: [checkSessionId]}, async(request, reply) => {
+
+    const { sessionId } = request.cookies
+    const getTheIdParam = z.object({
+      id: z.string().uuid(),
+    });
+    const { id } = getTheIdParam.parse(request.params);
+
+    await knex('meals')
+    .where("session_id", sessionId)
+    .andWhere("id", id)
+    .del()
+
+    return reply.status(204)
+
+  })
+
+  app.patch("/meals/:id",{preHandler: [checkSessionId]}, async(request, reply) => {
+    const { sessionId } = request.cookies;
+
+    const getTheIdParam = z.object({
+      id: z.string().uuid(),
+    });
+
+    const updatedMealsRegister = z.object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      Within_diet: z.boolean().optional(),
+      date: z.string().date().optional(),
+      time: z.string().time().optional(),
+    });
+    const { id } = getTheIdParam.parse(request.params);
+    
+    const data = updatedMealsRegister.parse(request.body) 
+
+    const updated_record = await knex('meals')
+    .where("session_id", sessionId)
+    .andWhere("id", id)
+    .update({...data})
+
+  })
 }
