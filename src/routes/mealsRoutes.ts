@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { z } from "zod";
+import { z, ParseResult } from "zod";
 import app from "../server";
 import { knex } from "../database";
 import { randomUUID } from "node:crypto";
@@ -81,12 +81,11 @@ export function mealsRouter(app: FastifyInstance) {
   })
 
   app.patch("/meals/:id",{preHandler: [checkSessionId]}, async(request, reply) => {
-    const { sessionId } = request.cookies;
 
+    const { sessionId } = request.cookies;
     const getTheIdParam = z.object({
       id: z.string().uuid(),
     });
-
     const updatedMealsRegister = z.object({
       name: z.string().optional(),
       description: z.string().optional(),
@@ -94,14 +93,60 @@ export function mealsRouter(app: FastifyInstance) {
       date: z.string().date().optional(),
       time: z.string().time().optional(),
     });
-    const { id } = getTheIdParam.parse(request.params);
-    
-    const data = updatedMealsRegister.parse(request.body) 
+
+    const { id } = getTheIdParam.parse(request.params);  
+    const data = updatedMealsRegister.parse(request.body)
 
     const updated_record = await knex('meals')
     .where("session_id", sessionId)
     .andWhere("id", id)
     .update({...data})
 
+    return reply.status(200).send({message: 'Campo alterado com sucesso'})
+
+  })
+
+  app.get("/statistics",{preHandler: [checkSessionId]}, async(request, reply) => {
+    const { sessionId } = request.cookies;
+
+    const [result] = await knex('meals')
+    .select(
+      knex.raw('count(id) as totalRefeicoes'),
+      knex.raw('count(case when Within_diet = 1 then 1 end) as totalDeRefeicoesCorretas'),
+      knex.raw('count(case when Within_diet = 0 then 1 end) as totalDeRefeicoesErradas')
+    )
+    .where('session_id', sessionId);
+
+    // Acessando os valores das contagens corretamente
+    const totalDeRefeicoes = result.totalRefeicoes;
+    const totalDeRefeicoesCorretas = result.totalDeRefeicoesCorretas;
+    const totalDeRefeicoesErradas = result.totalDeRefeicoesErradas;
+
+    const sequencia = await knex('meals')
+    .where("session_id", sessionId)
+    .select('Within_diet')
+
+    let maiorSequenciaCorreta = 0
+
+    sequencia.forEach(meal => {
+
+      if(meal.Within_diet === 1){
+        maiorSequenciaCorreta++
+      }else {
+        maiorSequenciaCorreta = 0
+      }
+       
+    })
+
+    const statistics = {
+      totalDeRefeicoes,
+      totalDeRefeicoesCorretas,
+      totalDeRefeicoesErradas,
+      maiorSequenciaCorreta
+    };
+
+
+
+    return reply.status(200).send(statistics)
   })
 }

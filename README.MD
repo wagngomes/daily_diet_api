@@ -19,11 +19,11 @@ Este projeto foi desenvolvido como parte do Desafio 02 do curso da Rocketseat, n
   - Data e Hora
   - Está dentro ou não da dieta
 
-[ ] Deve ser possível editar uma refeição, podendo alterar todos os dados acima
+[x] Deve ser possível editar uma refeição, podendo alterar todos os dados acima
 [x] Deve ser possível apagar uma refeição
 [x] Deve ser possível listar todas as refeições de um usuário
 [x] Deve ser possível visualizar uma única refeição
-[ ] Deve ser possível recuperar as métricas de um usuário
+[x] Deve ser possível recuperar as métricas de um usuário
   - Quantidade total de refeições registradas
   - Quantidade total de refeições dentro da dieta
   - Quantidade total de refeições fora da dieta
@@ -76,7 +76,7 @@ Inicie o servidor:
 
 npm run dev
 
-A API estará rodando em http://localhost:3000
+A API estará rodando em http://localhost:3333
 
 ## Rotas da API
 
@@ -88,10 +88,10 @@ GET /meals - Listar todas as refeições do usuário
 
 GET /meals/:id - Obter detalhes de uma refeição
 
-PUT /meals/:id - Editar uma refeição
+PATCH /meals/:id - Editar uma refeição
 
 DELETE /meals/:id - Excluir uma refeição
 
 Métricas
 
-GET /metrics - Recuperar estatísticas do usuário
+GET /statistics - Recuperar estatísticas do usuário
